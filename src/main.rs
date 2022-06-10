@@ -3,9 +3,15 @@
 
 use bevy::prelude::*;
 use bevy::DefaultPlugins;
+use bevy_egui_kbgp::KbgpNavCommand;
 use bevy_egui_kbgp::{KbgpNavBindings, KbgpPlugin, KbgpSettings};
+use bevy_pkv::PkvStore;
+use bevy_rapier2d::plugin::NoUserData;
+use bevy_rapier2d::plugin::RapierConfiguration;
+use bevy_rapier2d::plugin::RapierPhysicsPlugin;
 use clap::Parser;
 use signal_scuffle::GamePlugin;
+use signal_scuffle::MenuActionForKbgp;
 
 #[derive(Parser, Debug)]
 struct Args {
@@ -28,6 +34,7 @@ fn main() {
         ..Default::default()
     });
     app.add_plugins(DefaultPlugins);
+    app.insert_resource(PkvStore::new("AeonFelis", "SignalScuffle"));
     app.add_plugin(bevy_egui::EguiPlugin);
     if args.editor {
         app.add_plugin(bevy_yoleck::YoleckPluginForEditor);
@@ -50,12 +57,13 @@ fn main() {
             allow_mouse_wheel_sideways: false,
             allow_gamepads: true,
             bindings: {
-                KbgpNavBindings::default().with_wasd_navigation()
-                //.with_key(KeyCode::Escape, KbgpNavCommand::user(MenuActionForKbgp))
-                //.with_gamepad_button(
-                //GamepadButtonType::Start,
-                //KbgpNavCommand::user(MenuActionForKbgp),
-                //)
+                KbgpNavBindings::default()
+                    .with_wasd_navigation()
+                    .with_key(KeyCode::Escape, KbgpNavCommand::user(MenuActionForKbgp))
+                    .with_gamepad_button(
+                        GamepadButtonType::Start,
+                        KbgpNavCommand::user(MenuActionForKbgp),
+                    )
             },
         });
     }
@@ -63,6 +71,10 @@ fn main() {
         is_editor: args.editor,
         start_at_level: args.level,
     });
-
+    app.add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1.0));
+    app.insert_resource(RapierConfiguration {
+        gravity: Vec2::ZERO,
+        ..Default::default()
+    });
     app.run();
 }

@@ -84,5 +84,5 @@ def clippy(ctx):
 
 @task
 def erase_save(ctx):
-    save_dir = local.path('~/.local/share/signal-scuffle')
+    save_dir = local.path('~/.local/share/signalscuffle')
     save_dir.delete()

@@ -12,6 +12,8 @@ impl Plugin for LoadingPlugin {
 
 #[derive(AssetCollection)]
 pub struct GameAssets {
+    #[asset(path = "sprites/player.png")]
+    pub player: Handle<Image>,
     #[asset(path = "fonts/FiraSans-Bold.ttf")]
     pub font: Handle<Font>,
     #[asset(path = "levels/index.yoli")]
