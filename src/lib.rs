@@ -1,48 +1,76 @@
-mod actions;
-mod audio;
 mod loading;
 mod menu;
-mod player;
 
-use crate::actions::ActionsPlugin;
-use crate::audio::InternalAudioPlugin;
 use crate::loading::LoadingPlugin;
-use crate::menu::MenuPlugin;
-use crate::player::PlayerPlugin;
 
 use bevy::app::App;
-#[cfg(debug_assertions)]
-use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy::prelude::*;
+// use bevy_yoleck::{
+// YoleckEditorState, YoleckLoadingCommand, YoleckManaged, YoleckSyncWithEditorState,
+// };
 
-// This example game uses States to separate logic
-// See https://bevy-cheatbook.github.io/programming/states.html
-// Or https://github.com/bevyengine/bevy/blob/main/examples/ecs/state.rs
-#[derive(Clone, Eq, PartialEq, Debug, Hash)]
-enum GameState {
-    // During the loading State the LoadingPlugin will load our assets
-    Loading,
-    // During this State the actual game logic is executed
-    Playing,
-    // Here the menu is drawn and waiting for player interaction
-    Menu,
+use self::menu::MenuPlugin;
+
+pub struct GamePlugin {
+    pub is_editor: bool,
+    pub start_at_level: Option<String>,
 }
-
-pub struct GamePlugin;
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
-        app.add_state(GameState::Loading)
-            .add_plugin(LoadingPlugin)
-            .add_plugin(MenuPlugin)
-            .add_plugin(ActionsPlugin)
-            .add_plugin(InternalAudioPlugin)
-            .add_plugin(PlayerPlugin);
+        app.add_plugin(LoadingPlugin);
+        // app.add_plugin(CameraPlugin {
+        // is_editor: self.is_editor,
+        // });
 
-        #[cfg(debug_assertions)]
-        {
-            app.add_plugin(FrameTimeDiagnosticsPlugin::default())
-                .add_plugin(LogDiagnosticsPlugin::default());
+        app.add_system(enable_disable_physics);
+        if self.is_editor {
+            // app.add_plugin(YoleckSyncWithEditorState {
+            // when_editor: AppState::Editor,
+            // when_game: AppState::Game,
+            // });
+        } else {
+            app.add_plugin(MenuPlugin);
+            // app.add_state(AppState::Menu(MenuState::Main));
+            // app.add_system_set(
+            // SystemSet::on_enter(AppState::LoadLevel).with_system(handle_level_loading),
+            // );
+            // if let Some(start_at_level) = &self.start_at_level {
+            // let start_at_level = format!("{}.yol", start_at_level);
+            // app.add_startup_system(
+            // move |mut level_progress: ResMut<LevelProgress>,
+            // mut state: ResMut<State<AppState>>| {
+            // level_progress.current_level = Some(start_at_level.clone());
+            // state.set(AppState::LoadLevel).unwrap();
+            // },
+            // );
+            // }
         }
     }
 }
+
+fn enable_disable_physics(// state: Res<State<AppState>>,
+    // mut rapier_configuration: ResMut<RapierConfiguration>,
+) {
+    // rapier_configuration.physics_pipeline_active = *state.current() == AppState::Game;
+}
+
+// fn handle_level_loading(
+// level_entities_query: Query<Entity, With<YoleckManaged>>,
+// mut commands: Commands,
+// asset_server: Res<AssetServer>,
+// level_progress: Res<LevelProgress>,
+// mut yoleck_loading_command: ResMut<YoleckLoadingCommand>,
+// mut state: ResMut<State<AppState>>,
+// ) {
+// for entity in level_entities_query.iter() {
+// commands.entity(entity).despawn_recursive();
+// }
+// let current_level = level_progress
+// .current_level
+// .as_ref()
+// .expect("Entered LoadLevel state when current_level is None");
+// *yoleck_loading_command =
+// YoleckLoadingCommand::FromAsset(asset_server.load(&format!("levels/{}", current_level)));
+// state.set(AppState::Game).unwrap();
+// }
