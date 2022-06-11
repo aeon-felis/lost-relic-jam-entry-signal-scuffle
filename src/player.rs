@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::global_types::IsPlayer;
 use crate::loading::GameAssets;
+use crate::player_control::PlayerControl;
 //use crate::player_control::PlayerControl;
 //use crate::yoleck_utils::{position_adapter, GRANULARITY};
 
@@ -46,10 +47,14 @@ fn populate(mut populate: YoleckPopulate<Player>, game_assets: Res<GameAssets>) 
             Transform::from_translation(data.position.extend(0.0)),
         ));
         cmd.insert(RigidBody::Dynamic);
+        cmd.insert(Damping {
+            linear_damping: 1.0,
+            angular_damping: 1.0,
+        });
         cmd.insert(Collider::cuboid(0.75, 0.25));
         cmd.insert(ActiveEvents::COLLISION_EVENTS);
         cmd.insert(Velocity::default());
         //cmd.insert(LockedAxes::ROTATION_LOCKED);
-        //cmd.insert(PlayerControl::default());
+        cmd.insert(PlayerControl::default());
     });
 }

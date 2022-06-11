@@ -1,9 +1,11 @@
 mod camera;
 mod global_types;
+mod input;
 mod level_progress;
 mod loading;
 mod menu;
 mod player;
+mod player_control;
 mod utils;
 
 pub use crate::global_types::MenuActionForKbgp;
@@ -16,9 +18,11 @@ use bevy_yoleck::{YoleckLoadingCommand, YoleckManaged, YoleckSyncWithEditorState
 
 use self::camera::CameraPlugin;
 use self::global_types::{AppState, LevelProgress, MenuState};
+use self::input::GameInputPlugin;
 use self::level_progress::LevelProgressPlugin;
 use self::menu::MenuPlugin;
 use self::player::PlayerPlugin;
+use self::player_control::PlayerControlPlugin;
 
 pub struct GamePlugin {
     pub is_editor: bool,
@@ -31,6 +35,9 @@ impl Plugin for GamePlugin {
         app.add_plugin(CameraPlugin {
             is_editor: self.is_editor,
         });
+
+        app.add_plugin(GameInputPlugin);
+        app.add_plugin(PlayerControlPlugin);
 
         app.add_plugin(PlayerPlugin);
         app.add_plugin(LevelProgressPlugin);
