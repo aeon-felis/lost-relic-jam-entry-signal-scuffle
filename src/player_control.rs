@@ -122,7 +122,6 @@ fn control_player(
         if 0.1 < target_speed.length_squared() {
             let player_forward = (transform.rotation * Vec3::Y).truncate();
             let angle_to_direction = target_speed.angle_between(player_forward);
-            info!("{} {}", angle_to_direction, angle_to_direction.signum());
             if 0.1 < angle_to_direction {
                 velocity.angvel = -20.0;
             } else if angle_to_direction < -0.1 {

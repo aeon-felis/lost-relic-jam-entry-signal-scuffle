@@ -4,22 +4,19 @@ use bevy_yoleck::vpeol_2d::{yoleck_vpeol_position_edit_adapter, YoleckVpeolTrans
 use bevy_yoleck::{YoleckExtForApp, YoleckPopulate, YoleckTypeHandler};
 use serde::{Deserialize, Serialize};
 
-use crate::global_types::IsPlayer;
+use crate::global_types::IsZombie;
 use crate::loading::GameAssets;
-use crate::player_control::PlayerControl;
-//use crate::player_control::PlayerControl;
-//use crate::yoleck_utils::{position_adapter, GRANULARITY};
 
-pub struct PlayerPlugin;
+pub struct ZombiePlugin;
 
-impl Plugin for PlayerPlugin {
+impl Plugin for ZombiePlugin {
     fn build(&self, app: &mut App) {
         app.add_yoleck_handler({
-            YoleckTypeHandler::<Player>::new("Player")
+            YoleckTypeHandler::<Zombie>::new("Zombie")
                 .populate_with(populate)
-                .with(yoleck_vpeol_position_edit_adapter(|player: &mut Player| {
+                .with(yoleck_vpeol_position_edit_adapter(|zombie: &mut Zombie| {
                     YoleckVpeolTransform2dProjection {
-                        translation: &mut player.position,
+                        translation: &mut zombie.position,
                     }
                 }))
         });
@@ -27,20 +24,20 @@ impl Plugin for PlayerPlugin {
 }
 
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
-pub struct Player {
+pub struct Zombie {
     #[serde(default)]
     position: Vec2,
 }
 
-fn populate(mut populate: YoleckPopulate<Player>, game_assets: Res<GameAssets>) {
+fn populate(mut populate: YoleckPopulate<Zombie>, game_assets: Res<GameAssets>) {
     populate.populate(|_ctx, data, mut cmd| {
-        cmd.insert(IsPlayer);
+        cmd.insert(IsZombie);
         cmd.insert_bundle(SpriteBundle {
             sprite: Sprite {
                 custom_size: Some(Vec2::new(1.0, 1.0)),
                 ..Default::default()
             },
-            texture: game_assets.player.clone(),
+            texture: game_assets.zombie.clone(),
             ..Default::default()
         });
         cmd.insert_bundle(TransformBundle::from_transform(
@@ -52,8 +49,7 @@ fn populate(mut populate: YoleckPopulate<Player>, game_assets: Res<GameAssets>) 
             angular_damping: 1.0,
         });
         cmd.insert(Collider::cuboid(0.4, 0.2));
-        cmd.insert(ColliderMassProperties::Density(1.0));
+        cmd.insert(ColliderMassProperties::Density(10.0));
         cmd.insert(Velocity::default());
-        cmd.insert(PlayerControl::default());
     });
 }

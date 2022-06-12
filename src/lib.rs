@@ -7,6 +7,7 @@ mod menu;
 mod player;
 mod player_control;
 mod utils;
+mod zombie;
 
 pub use crate::global_types::MenuActionForKbgp;
 use crate::loading::LoadingPlugin;
@@ -23,6 +24,7 @@ use self::level_progress::LevelProgressPlugin;
 use self::menu::MenuPlugin;
 use self::player::PlayerPlugin;
 use self::player_control::PlayerControlPlugin;
+use self::zombie::ZombiePlugin;
 
 pub struct GamePlugin {
     pub is_editor: bool,
@@ -40,6 +42,7 @@ impl Plugin for GamePlugin {
         app.add_plugin(PlayerControlPlugin);
 
         app.add_plugin(PlayerPlugin);
+        app.add_plugin(ZombiePlugin);
         app.add_plugin(LevelProgressPlugin);
         app.add_system(enable_disable_physics);
         if self.is_editor {

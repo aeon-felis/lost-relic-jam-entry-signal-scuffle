@@ -38,3 +38,6 @@ pub enum InputBinding {
 
 #[derive(Component)]
 pub struct IsPlayer;
+
+#[derive(Component)]
+pub struct IsZombie;
