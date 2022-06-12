@@ -7,6 +7,7 @@ mod menu;
 mod player;
 mod player_control;
 mod utils;
+mod wifi;
 mod zombie;
 
 pub use crate::global_types::MenuActionForKbgp;
@@ -24,6 +25,7 @@ use self::level_progress::LevelProgressPlugin;
 use self::menu::MenuPlugin;
 use self::player::PlayerPlugin;
 use self::player_control::PlayerControlPlugin;
+use self::wifi::WifiPlugin;
 use self::zombie::ZombiePlugin;
 
 pub struct GamePlugin {
@@ -43,6 +45,7 @@ impl Plugin for GamePlugin {
 
         app.add_plugin(PlayerPlugin);
         app.add_plugin(ZombiePlugin);
+        app.add_plugin(WifiPlugin);
         app.add_plugin(LevelProgressPlugin);
         app.add_system(enable_disable_physics);
         if self.is_editor {

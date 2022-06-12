@@ -16,6 +16,8 @@ pub struct GameAssets {
     pub player: Handle<Image>,
     #[asset(path = "sprites/zombie.png")]
     pub zombie: Handle<Image>,
+    #[asset(path = "sprites/wifi.png")]
+    pub wifi: Handle<Image>,
     #[asset(path = "fonts/FiraSans-Bold.ttf")]
     pub font: Handle<Font>,
     #[asset(path = "levels/index.yoli")]

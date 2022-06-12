@@ -41,3 +41,6 @@ pub struct IsPlayer;
 
 #[derive(Component)]
 pub struct IsZombie;
+
+#[derive(Component)]
+pub struct IsWifi;
