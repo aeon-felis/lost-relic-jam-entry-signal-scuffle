@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::global_types::{AppState, IsWifi, IsZombie};
 use crate::loading::GameAssets;
+use crate::movement_resolver::MoveController;
 use crate::utils::some_or;
 
 pub struct ZombiePlugin;
@@ -53,15 +54,20 @@ fn populate(mut populate: YoleckPopulate<Zombie>, game_assets: Res<GameAssets>) 
         cmd.insert(Collider::cuboid(0.4, 0.2));
         cmd.insert(ColliderMassProperties::Density(10.0));
         cmd.insert(Velocity::default());
+        cmd.insert(MoveController {
+            max_speed: 1.0,
+            ..Default::default()
+        });
+        cmd.insert(ActiveEvents::COLLISION_EVENTS);
     });
 }
 
 fn follow_wifi_signal(
-    time: Res<Time>,
-    mut zombies_query: Query<(&GlobalTransform, &mut Velocity), With<IsZombie>>,
+    _time: Res<Time>,
+    mut zombies_query: Query<(&GlobalTransform, &mut MoveController), With<IsZombie>>,
     wifi_query: Query<&GlobalTransform, With<IsWifi>>,
 ) {
-    for (zombie_transform, mut velocity) in zombies_query.iter_mut() {
+    for (zombie_transform, mut move_controller) in zombies_query.iter_mut() {
         let zombie_position = zombie_transform.translation.truncate();
         let closest_wifi_position = wifi_query
             .iter()
@@ -71,6 +77,12 @@ fn follow_wifi_signal(
             });
         let closest_wifi_position = some_or!(closest_wifi_position; continue);
         let vec_to_wifi = closest_wifi_position - zombie_position;
+        if vec_to_wifi.length_squared() < 1.0 {
+            move_controller.target_speed = vec_to_wifi;
+        } else {
+            move_controller.target_speed = vec_to_wifi.normalize();
+        }
+        /*
         if vec_to_wifi.length_squared() < 1.0 {
             continue;
         }
@@ -93,5 +105,6 @@ fn follow_wifi_signal(
                 velocity.linvel += current_zombie_direction * dot_product * time.delta_seconds();
             }
         }
+        */
     }
 }

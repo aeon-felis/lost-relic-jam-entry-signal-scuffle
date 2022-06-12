@@ -23,6 +23,11 @@ pub enum MenuState {
     GameOver,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Hash, SystemLabel)]
+pub enum GameSystemLabel {
+    ApplyMovement,
+}
+
 pub struct LevelProgress {
     pub just_completed: Option<String>,
     pub current_level: Option<String>,

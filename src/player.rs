@@ -6,9 +6,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::global_types::IsPlayer;
 use crate::loading::GameAssets;
+use crate::movement_resolver::MoveController;
 use crate::player_control::PlayerControl;
-//use crate::player_control::PlayerControl;
-//use crate::yoleck_utils::{position_adapter, GRANULARITY};
 
 pub struct PlayerPlugin;
 
@@ -52,8 +51,10 @@ fn populate(mut populate: YoleckPopulate<Player>, game_assets: Res<GameAssets>) 
             angular_damping: 1.0,
         });
         cmd.insert(Collider::cuboid(0.4, 0.2));
-        cmd.insert(ColliderMassProperties::Density(1.0));
+        cmd.insert(ColliderMassProperties::Density(10.0));
         cmd.insert(Velocity::default());
         cmd.insert(PlayerControl::default());
+        cmd.insert(MoveController::default());
+        cmd.insert(ActiveEvents::COLLISION_EVENTS);
     });
 }

@@ -3,13 +3,17 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 use ezinput::prelude::*;
 
-use crate::global_types::{AppState, InputBinding};
+use crate::global_types::{AppState, GameSystemLabel, InputBinding};
+use crate::movement_resolver::MoveController;
 
 pub struct PlayerControlPlugin;
 
 impl Plugin for PlayerControlPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(SystemSet::on_update(AppState::Game).with_system(control_player));
+        app.add_system_set({
+            SystemSet::on_update(AppState::Game)
+                .with_system(control_player.before(GameSystemLabel::ApplyMovement))
+        });
         app.insert_resource(PlayerMovementSettings {
             max_speed: 10.0,
             impulse_exponent: 4.0,
@@ -64,7 +68,13 @@ struct PlayerMovementSettings {
 fn control_player(
     time: Res<Time>,
     input_views: Query<&InputView<InputBinding>>,
-    mut query: Query<(Entity, &mut Transform, &mut Velocity, &mut PlayerControl)>,
+    mut query: Query<(
+        Entity,
+        &mut Transform,
+        &mut Velocity,
+        &mut PlayerControl,
+        &mut MoveController,
+    )>,
     player_movement_settings: Res<PlayerMovementSettings>,
     //rapier_context: Res<RapierContext>,
 ) {
@@ -94,7 +104,11 @@ fn control_player(
         Vec2::ZERO
     };
 
-    for (player_entity, mut transform, mut velocity, _player_control) in query.iter_mut() {
+    for (player_entity, mut transform, mut velocity, _player_control, mut move_controller) in
+        query.iter_mut()
+    {
+        move_controller.target_speed = target_speed;
+        /*
         let current_speed = velocity.linvel / player_movement_settings.max_speed;
 
         // TODO: Use different impulses for accelerate, decelerate and turn
@@ -133,5 +147,6 @@ fn control_player(
         } else if target_speed.length_squared() < 0.1 {
             velocity.angvel = 0.0;
         }
+        */
     }
 }
