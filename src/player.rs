@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 use bevy_yoleck::vpeol_2d::{yoleck_vpeol_position_edit_adapter, YoleckVpeolTransform2dProjection};
-use bevy_yoleck::{YoleckExtForApp, YoleckPopulate, YoleckTypeHandler};
+use bevy_yoleck::{egui, YoleckEdit, YoleckExtForApp, YoleckPopulate, YoleckTypeHandler};
 use serde::{Deserialize, Serialize};
 
 use crate::global_types::IsPlayer;
@@ -21,6 +21,7 @@ impl Plugin for PlayerPlugin {
                         translation: &mut player.position,
                     }
                 }))
+                .edit_with(edit)
         });
     }
 }
@@ -29,6 +30,8 @@ impl Plugin for PlayerPlugin {
 pub struct Player {
     #[serde(default)]
     position: Vec2,
+    #[serde(default)]
+    rotation: f32,
 }
 
 fn populate(mut populate: YoleckPopulate<Player>, game_assets: Res<GameAssets>) {
@@ -43,7 +46,8 @@ fn populate(mut populate: YoleckPopulate<Player>, game_assets: Res<GameAssets>) 
             ..Default::default()
         });
         cmd.insert_bundle(TransformBundle::from_transform(
-            Transform::from_translation(data.position.extend(0.0)),
+            Transform::from_translation(data.position.extend(0.0))
+                .with_rotation(Quat::from_rotation_z(data.rotation)),
         ));
         cmd.insert(RigidBody::Dynamic);
         cmd.insert(Damping {
@@ -56,5 +60,16 @@ fn populate(mut populate: YoleckPopulate<Player>, game_assets: Res<GameAssets>) 
         cmd.insert(PlayerControl::default());
         cmd.insert(MoveController::default());
         cmd.insert(ActiveEvents::COLLISION_EVENTS);
+    });
+}
+
+fn edit(mut edit: YoleckEdit<Player>) {
+    edit.edit(|_, data, ui| {
+        use std::f32::consts::{FRAC_PI_8, PI};
+        ui.add({
+            egui::Slider::new(&mut data.rotation, PI..=-PI)
+                .prefix("Angle: ")
+                .step_by(FRAC_PI_8 as f64)
+        });
     });
 }

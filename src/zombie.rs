@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 use bevy_yoleck::vpeol_2d::{yoleck_vpeol_position_edit_adapter, YoleckVpeolTransform2dProjection};
-use bevy_yoleck::{YoleckExtForApp, YoleckPopulate, YoleckTypeHandler};
+use bevy_yoleck::{egui, YoleckEdit, YoleckExtForApp, YoleckPopulate, YoleckTypeHandler};
 use serde::{Deserialize, Serialize};
 
 use crate::global_types::{AppState, IsWifi, IsZombie};
@@ -21,6 +21,7 @@ impl Plugin for ZombiePlugin {
                         translation: &mut zombie.position,
                     }
                 }))
+                .edit_with(edit)
         });
         app.add_system_set(SystemSet::on_update(AppState::Game).with_system(follow_wifi_signal));
     }
@@ -30,6 +31,8 @@ impl Plugin for ZombiePlugin {
 pub struct Zombie {
     #[serde(default)]
     position: Vec2,
+    #[serde(default)]
+    rotation: f32,
 }
 
 fn populate(mut populate: YoleckPopulate<Zombie>, game_assets: Res<GameAssets>) {
@@ -44,7 +47,8 @@ fn populate(mut populate: YoleckPopulate<Zombie>, game_assets: Res<GameAssets>) 
             ..Default::default()
         });
         cmd.insert_bundle(TransformBundle::from_transform(
-            Transform::from_translation(data.position.extend(0.0)),
+            Transform::from_translation(data.position.extend(0.0))
+                .with_rotation(Quat::from_rotation_z(data.rotation)),
         ));
         cmd.insert(RigidBody::Dynamic);
         cmd.insert(Damping {
@@ -59,6 +63,17 @@ fn populate(mut populate: YoleckPopulate<Zombie>, game_assets: Res<GameAssets>) 
             ..Default::default()
         });
         cmd.insert(ActiveEvents::COLLISION_EVENTS);
+    });
+}
+
+fn edit(mut edit: YoleckEdit<Zombie>) {
+    edit.edit(|_, data, ui| {
+        use std::f32::consts::{FRAC_PI_8, PI};
+        ui.add({
+            egui::Slider::new(&mut data.rotation, PI..=-PI)
+                .prefix("Angle: ")
+                .step_by(FRAC_PI_8 as f64)
+        });
     });
 }
 
@@ -82,29 +97,5 @@ fn follow_wifi_signal(
         } else {
             move_controller.target_speed = vec_to_wifi.normalize();
         }
-        /*
-        if vec_to_wifi.length_squared() < 1.0 {
-            continue;
-        }
-        let direction_to_wifi = vec_to_wifi.normalize();
-        let current_zombie_direction = zombie_transform.rotation.mul_vec3(Vec3::Y).truncate();
-        let angle_diff = direction_to_wifi.angle_between(current_zombie_direction);
-        if angle_diff.is_nan() {
-            continue;
-        }
-        if 0.1 < angle_diff.abs() {
-            velocity.angvel = -angle_diff.signum();
-        } else {
-            velocity.angvel = -angle_diff;
-        }
-        let dot_product = current_zombie_direction.dot(direction_to_wifi);
-        if 0.3 < dot_product {
-            let current_forward_speed = current_zombie_direction.dot(velocity.linvel);
-            const ZOMBIE_SPEED: f32 = 1.0;
-            if current_forward_speed < dot_product * ZOMBIE_SPEED {
-                velocity.linvel += current_zombie_direction * dot_product * time.delta_seconds();
-            }
-        }
-        */
     }
 }
