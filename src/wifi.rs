@@ -3,7 +3,7 @@ use bevy_yoleck::vpeol_2d::{yoleck_vpeol_position_edit_adapter, YoleckVpeolTrans
 use bevy_yoleck::{YoleckExtForApp, YoleckPopulate, YoleckTypeHandler};
 use serde::{Deserialize, Serialize};
 
-use crate::global_types::{AppState, IsWifi, WifiClient};
+use crate::global_types::{AppState, DownloadProgress, IsWifi, WifiClient};
 use crate::loading::GameAssets;
 
 pub struct WifiPlugin;
@@ -19,7 +19,11 @@ impl Plugin for WifiPlugin {
                     }
                 }))
         });
-        app.add_system_set(SystemSet::on_update(AppState::Game).with_system(update_access_points));
+        app.add_system_set({
+            SystemSet::on_update(AppState::Game)
+                .with_system(update_access_points)
+                .with_system(update_download_progress)
+        });
     }
 }
 
@@ -58,11 +62,7 @@ fn update_access_points(
                 let distance_sq = client_transform
                     .translation
                     .distance_squared(wifi_transform.translation);
-                let signal_strength = if distance_sq < 1.0 {
-                    1.0
-                } else {
-                    1.0 / distance_sq
-                };
+                let signal_strength = 1.0 / (1.0 + (0.2 * distance_sq).ln_1p());
                 (wifi_entity, signal_strength)
             })
             .max_by_key(|(_, signal_strength)| float_ord::FloatOrd(*signal_strength))
@@ -73,5 +73,58 @@ fn update_access_points(
             client.access_point = None;
             client.signal_strength = 0.0;
         }
+    }
+}
+
+fn update_download_progress(
+    time: Res<Time>,
+    mut query: Query<(&WifiClient, &mut DownloadProgress)>,
+) {
+    for (wifi_client, mut download_progress) in query.iter_mut() {
+        let connected = 0.7 <= wifi_client.signal_strength;
+        *download_progress = match *download_progress {
+            DownloadProgress::Disconnected => {
+                if connected {
+                    DownloadProgress::Downloading { progress: 0.0 }
+                } else {
+                    DownloadProgress::Disconnected
+                }
+            }
+            DownloadProgress::LosingConnection {
+                time_before_disconnection,
+                progress,
+            } => {
+                if connected {
+                    DownloadProgress::Downloading { progress }
+                } else {
+                    let time_before_disconnection =
+                        time_before_disconnection - time.delta_seconds();
+                    if time_before_disconnection <= 0.0 {
+                        DownloadProgress::Disconnected
+                    } else {
+                        DownloadProgress::LosingConnection {
+                            time_before_disconnection,
+                            progress,
+                        }
+                    }
+                }
+            }
+            DownloadProgress::Downloading { progress } => {
+                if connected {
+                    let progress = progress + time.delta_seconds() / 30.0;
+                    if 1.0 <= progress {
+                        DownloadProgress::Completed
+                    } else {
+                        DownloadProgress::Downloading { progress }
+                    }
+                } else {
+                    DownloadProgress::LosingConnection {
+                        time_before_disconnection: 5.0,
+                        progress,
+                    }
+                }
+            }
+            DownloadProgress::Completed => DownloadProgress::Completed,
+        };
     }
 }

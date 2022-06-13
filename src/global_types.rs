@@ -55,3 +55,16 @@ pub struct WifiClient {
     pub access_point: Option<Entity>,
     pub signal_strength: f32,
 }
+
+#[derive(Component)]
+pub enum DownloadProgress {
+    Disconnected,
+    LosingConnection {
+        time_before_disconnection: f32,
+        progress: f32,
+    },
+    Downloading {
+        progress: f32,
+    },
+    Completed,
+}

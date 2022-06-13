@@ -4,7 +4,7 @@ use bevy_yoleck::vpeol_2d::{yoleck_vpeol_position_edit_adapter, YoleckVpeolTrans
 use bevy_yoleck::{egui, YoleckEdit, YoleckExtForApp, YoleckPopulate, YoleckTypeHandler};
 use serde::{Deserialize, Serialize};
 
-use crate::global_types::{IsPlayer, WifiClient};
+use crate::global_types::{DownloadProgress, IsPlayer, WifiClient};
 use crate::loading::GameAssets;
 use crate::movement_resolver::MoveController;
 use crate::player_control::PlayerControl;
@@ -45,10 +45,12 @@ fn populate(mut populate: YoleckPopulate<Player>, game_assets: Res<GameAssets>) 
             texture: game_assets.player.clone(),
             ..Default::default()
         });
-        cmd.insert_bundle(TransformBundle::from_transform(
-            Transform::from_translation(data.position.extend(0.0))
-                .with_rotation(Quat::from_rotation_z(data.rotation)),
-        ));
+        let transform = Transform::from_translation(data.position.extend(0.0))
+            .with_rotation(Quat::from_rotation_z(data.rotation));
+        cmd.insert_bundle(TransformBundle {
+            local: transform,
+            global: transform.into(),
+        });
         cmd.insert(RigidBody::Dynamic);
         cmd.insert(Damping {
             linear_damping: 1.0,
@@ -60,6 +62,7 @@ fn populate(mut populate: YoleckPopulate<Player>, game_assets: Res<GameAssets>) 
         cmd.insert(PlayerControl::default());
         cmd.insert(MoveController::default());
         cmd.insert(WifiClient::default());
+        cmd.insert(DownloadProgress::Disconnected);
         cmd.insert(ActiveEvents::COLLISION_EVENTS);
     });
 }
