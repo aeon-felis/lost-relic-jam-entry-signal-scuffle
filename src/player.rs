@@ -4,7 +4,7 @@ use bevy_yoleck::vpeol_2d::{yoleck_vpeol_position_edit_adapter, YoleckVpeolTrans
 use bevy_yoleck::{egui, YoleckEdit, YoleckExtForApp, YoleckPopulate, YoleckTypeHandler};
 use serde::{Deserialize, Serialize};
 
-use crate::global_types::IsPlayer;
+use crate::global_types::{IsPlayer, WifiClient};
 use crate::loading::GameAssets;
 use crate::movement_resolver::MoveController;
 use crate::player_control::PlayerControl;
@@ -59,6 +59,7 @@ fn populate(mut populate: YoleckPopulate<Player>, game_assets: Res<GameAssets>) 
         cmd.insert(Velocity::default());
         cmd.insert(PlayerControl::default());
         cmd.insert(MoveController::default());
+        cmd.insert(WifiClient::default());
         cmd.insert(ActiveEvents::COLLISION_EVENTS);
     });
 }

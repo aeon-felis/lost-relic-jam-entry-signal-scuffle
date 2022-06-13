@@ -4,7 +4,7 @@ use bevy_yoleck::vpeol_2d::{yoleck_vpeol_position_edit_adapter, YoleckVpeolTrans
 use bevy_yoleck::{egui, YoleckEdit, YoleckExtForApp, YoleckPopulate, YoleckTypeHandler};
 use serde::{Deserialize, Serialize};
 
-use crate::global_types::{AppState, IsWifi, IsZombie};
+use crate::global_types::{AppState, IsWifi, IsZombie, WifiClient};
 use crate::loading::GameAssets;
 use crate::movement_resolver::MoveController;
 use crate::utils::some_or;
@@ -62,6 +62,7 @@ fn populate(mut populate: YoleckPopulate<Zombie>, game_assets: Res<GameAssets>) 
             max_speed: 1.0,
             ..Default::default()
         });
+        cmd.insert(WifiClient::default());
         cmd.insert(ActiveEvents::COLLISION_EVENTS);
     });
 }
@@ -78,19 +79,15 @@ fn edit(mut edit: YoleckEdit<Zombie>) {
 }
 
 fn follow_wifi_signal(
-    _time: Res<Time>,
-    mut zombies_query: Query<(&GlobalTransform, &mut MoveController), With<IsZombie>>,
+    mut zombies_query: Query<(&GlobalTransform, &WifiClient, &mut MoveController), With<IsZombie>>,
     wifi_query: Query<&GlobalTransform, With<IsWifi>>,
 ) {
-    for (zombie_transform, mut move_controller) in zombies_query.iter_mut() {
+    for (zombie_transform, wifi_client, mut move_controller) in zombies_query.iter_mut() {
         let zombie_position = zombie_transform.translation.truncate();
-        let closest_wifi_position = wifi_query
-            .iter()
-            .map(|transform| transform.translation.truncate())
-            .min_by_key(|wifi_position| {
-                float_ord::FloatOrd(zombie_position.distance_squared(*wifi_position))
-            });
-        let closest_wifi_position = some_or!(closest_wifi_position; continue);
+        let wifi_entity = some_or!(wifi_client.access_point; continue);
+        let closest_wifi_position = some_or!(wifi_query.get(wifi_entity).ok(); continue)
+            .translation
+            .truncate();
         let vec_to_wifi = closest_wifi_position - zombie_position;
         if vec_to_wifi.length_squared() < 1.0 {
             move_controller.target_speed = vec_to_wifi;

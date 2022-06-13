@@ -7,6 +7,7 @@ mod menu;
 mod movement_resolver;
 mod player;
 mod player_control;
+mod score;
 mod utils;
 mod wifi;
 mod zombie;
@@ -27,6 +28,7 @@ use self::menu::MenuPlugin;
 use self::movement_resolver::MovementResolverPlugin;
 use self::player::PlayerPlugin;
 use self::player_control::PlayerControlPlugin;
+use self::score::ScorePlugin;
 use self::wifi::WifiPlugin;
 use self::zombie::ZombiePlugin;
 
@@ -45,6 +47,7 @@ impl Plugin for GamePlugin {
         app.add_plugin(GameInputPlugin);
         app.add_plugin(PlayerControlPlugin);
         app.add_plugin(MovementResolverPlugin);
+        app.add_plugin(ScorePlugin);
 
         app.add_plugin(PlayerPlugin);
         app.add_plugin(ZombiePlugin);

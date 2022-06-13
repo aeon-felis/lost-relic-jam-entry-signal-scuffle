@@ -49,3 +49,9 @@ pub struct IsZombie;
 
 #[derive(Component)]
 pub struct IsWifi;
+
+#[derive(Default, Component)]
+pub struct WifiClient {
+    pub access_point: Option<Entity>,
+    pub signal_strength: f32,
+}

@@ -42,6 +42,7 @@ pub(crate) use entities_ordered_by_type;
 
 macro_rules! some_or {
     ($option:expr; $($if_none:tt)*) => {{
+        #[allow(clippy::match_result_ok)]
         if let Some(some) = $option {
             some
         } else {
