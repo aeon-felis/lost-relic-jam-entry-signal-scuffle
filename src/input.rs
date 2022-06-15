@@ -73,6 +73,13 @@ impl Default for InputConfig {
             view.add_binding(&mut binding);
         }
 
+        view.add_binding(&mut {
+            let mut binding = ActionBinding::from(InputBinding::Grab);
+            binding.receivers(InputReceiver::KeyboardKey(KeyCode::Space).into());
+            binding.receivers(InputReceiver::GamepadButton(GamepadButtonType::South).into());
+            binding
+        });
+
         Self(view)
     }
 }

@@ -39,6 +39,7 @@ pub struct LevelProgress {
 pub enum InputBinding {
     MoveHorizontal,
     MoveVertical,
+    Grab,
 }
 
 #[derive(Component)]
