@@ -1,5 +1,3 @@
-#![allow(unused_macros, unused_imports)]
-
 pub trait ReorderItem {
     type Type;
 

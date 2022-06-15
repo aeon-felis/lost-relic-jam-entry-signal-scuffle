@@ -1,4 +1,5 @@
 mod camera;
+mod door;
 mod global_types;
 mod input;
 mod level_progress;
@@ -21,6 +22,7 @@ use bevy_rapier2d::plugin::RapierConfiguration;
 use bevy_yoleck::{YoleckLoadingCommand, YoleckManaged, YoleckSyncWithEditorState};
 
 use self::camera::CameraPlugin;
+use self::door::DoorPlugin;
 use self::global_types::{AppState, LevelProgress, MenuState};
 use self::input::GameInputPlugin;
 use self::level_progress::LevelProgressPlugin;
@@ -52,6 +54,7 @@ impl Plugin for GamePlugin {
         app.add_plugin(PlayerPlugin);
         app.add_plugin(ZombiePlugin);
         app.add_plugin(WifiPlugin);
+        app.add_plugin(DoorPlugin);
         app.add_plugin(LevelProgressPlugin);
         app.add_system(enable_disable_physics);
         if self.is_editor {

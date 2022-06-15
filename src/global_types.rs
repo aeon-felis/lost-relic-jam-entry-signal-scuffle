@@ -62,6 +62,11 @@ pub enum GrabStatus {
 #[derive(Component)]
 pub struct IsWifi;
 
+#[derive(Component)]
+pub struct DoorStatus {
+    pub is_open: bool,
+}
+
 #[derive(Default, Component)]
 pub struct WifiClient {
     pub access_point: Option<Entity>,

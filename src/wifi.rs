@@ -111,7 +111,7 @@ fn update_download_progress(
             }
             DownloadProgress::Downloading { progress } => {
                 if connected {
-                    let progress = progress + time.delta_seconds() / 30.0;
+                    let progress = progress + time.delta_seconds() / 2.0;
                     if 1.0 <= progress {
                         DownloadProgress::Completed
                     } else {
