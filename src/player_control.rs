@@ -98,55 +98,18 @@ fn control_player(
             num_participating += 1;
         }
     }
-    let target_speed = if 0 < num_participating {
+    let mut target_speed = if 0 < num_participating {
         Vec2::from(movement_values) / num_participating as f32
     } else {
         Vec2::ZERO
     };
+    if 1.0 < target_speed.length_squared() {
+        target_speed = target_speed.normalize();
+    }
 
     for (player_entity, mut transform, mut velocity, _player_control, mut move_controller) in
         query.iter_mut()
     {
         move_controller.target_speed = target_speed;
-        /*
-        let current_speed = velocity.linvel / player_movement_settings.max_speed;
-
-        // TODO: Use different impulses for accelerate, decelerate and turn
-
-        let impulse = target_speed - current_speed;
-
-        let orig_impulse_magnitude = impulse.length();
-
-        // TODO: Implement a better way to finish the brake
-        if orig_impulse_magnitude < 0.4 {
-            velocity.linvel = player_movement_settings.max_speed * target_speed;
-        } else {
-            let impulse = if 1.0 < orig_impulse_magnitude {
-                impulse.normalize()
-            } else {
-                impulse.normalize()
-                    * orig_impulse_magnitude.powf(player_movement_settings.impulse_exponent)
-            };
-
-            let mut impulse =
-                time.delta().as_secs_f32() * player_movement_settings.impulse_coefficient * impulse;
-            velocity.linvel += impulse;
-        }
-
-        if 0.1 < target_speed.length_squared() {
-            let player_forward = (transform.rotation * Vec3::Y).truncate();
-            let angle_to_direction = target_speed.angle_between(player_forward);
-            if 0.1 < angle_to_direction {
-                velocity.angvel = -20.0;
-            } else if angle_to_direction < -0.1 {
-                velocity.angvel = 20.0;
-            } else {
-                velocity.angvel = 0.0;
-                transform.rotation = Quat::from_rotation_z(-target_speed.angle_between(Vec2::Y));
-            }
-        } else if target_speed.length_squared() < 0.1 {
-            velocity.angvel = 0.0;
-        }
-        */
     }
 }
