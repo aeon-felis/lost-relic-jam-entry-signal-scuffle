@@ -60,6 +60,7 @@ fn populate(mut populate: YoleckPopulate<Zombie>, game_assets: Res<GameAssets>) 
         cmd.insert(Velocity::default());
         cmd.insert(MoveController {
             max_speed: 1.0,
+            impulse_coefficient: 100.0,
             ..Default::default()
         });
         cmd.insert(WifiClient::default());
