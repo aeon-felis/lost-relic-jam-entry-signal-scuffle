@@ -3,7 +3,7 @@ use bevy::utils::HashSet;
 use bevy_rapier2d::pipeline::CollisionEvent;
 use bevy_rapier2d::prelude::Velocity;
 
-use crate::global_types::{AppState, GameSystemLabel};
+use crate::global_types::{AppState, GameSystemLabel, GrabStatus};
 
 pub struct MovementResolverPlugin;
 
@@ -66,9 +66,21 @@ fn maintain_contact_lists(
 
 fn apply_movement(
     time: Res<Time>,
-    mut query: Query<(&MoveController, &mut Transform, &mut Velocity)>,
+    mut query: Query<(Entity, &MoveController, &mut Transform, &mut Velocity)>,
+    grabbers_query: Query<(Entity, &GrabStatus)>,
 ) {
-    for (move_controller, mut transform, mut velocity) in query.iter_mut() {
+    let non_rotating: HashSet<Entity> = grabbers_query
+        .iter()
+        .filter_map(|(grabber, grab_status)| {
+            if let GrabStatus::Holding { other, .. } = grab_status {
+                Some([grabber, *other])
+            } else {
+                None
+            }
+        })
+        .flatten()
+        .collect();
+    for (moving_entity, move_controller, mut transform, mut velocity) in query.iter_mut() {
         let current_speed = velocity.linvel / move_controller.max_speed;
 
         // TODO: Use different impulses for accelerate, decelerate and turn
@@ -92,20 +104,22 @@ fn apply_movement(
             velocity.linvel += impulse;
         }
 
-        if 0.1 < move_controller.target_speed.length_squared() {
-            let player_forward = (transform.rotation * Vec3::Y).truncate();
-            let angle_to_direction = move_controller.target_speed.angle_between(player_forward);
-            if 0.1 < angle_to_direction {
-                velocity.angvel = -20.0;
-            } else if angle_to_direction < -0.1 {
-                velocity.angvel = 20.0;
-            } else {
+        if !non_rotating.contains(&moving_entity) {
+            if 0.1 < move_controller.target_speed.length_squared() {
+                let player_forward = (transform.rotation * Vec3::Y).truncate();
+                let angle_to_direction = move_controller.target_speed.angle_between(player_forward);
+                if 0.1 < angle_to_direction {
+                    velocity.angvel = -20.0;
+                } else if angle_to_direction < -0.1 {
+                    velocity.angvel = 20.0;
+                } else {
+                    velocity.angvel = 0.0;
+                    transform.rotation =
+                        Quat::from_rotation_z(-move_controller.target_speed.angle_between(Vec2::Y));
+                }
+            } else if move_controller.target_speed.length_squared() < 0.1 {
                 velocity.angvel = 0.0;
-                transform.rotation =
-                    Quat::from_rotation_z(-move_controller.target_speed.angle_between(Vec2::Y));
             }
-        } else if move_controller.target_speed.length_squared() < 0.1 {
-            velocity.angvel = 0.0;
         }
     }
 }

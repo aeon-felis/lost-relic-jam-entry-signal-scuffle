@@ -49,6 +49,17 @@ pub struct IsPlayer;
 pub struct IsZombie;
 
 #[derive(Component)]
+pub struct Grabbable;
+
+#[derive(Component)]
+pub enum GrabStatus {
+    NoGrab,
+    GrabFailed,
+    Reaching { hands_entity: Entity, how_long: f32 },
+    Holding { hands_entity: Entity, other: Entity },
+}
+
+#[derive(Component)]
 pub struct IsWifi;
 
 #[derive(Default, Component)]

@@ -1,11 +1,14 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
+use bevy_rapier2d::rapier::prelude::JointAxesMask;
 use bevy_yoleck::vpeol_2d::{yoleck_vpeol_position_edit_adapter, YoleckVpeolTransform2dProjection};
 use bevy_yoleck::{egui, YoleckEdit, YoleckExtForApp, YoleckPopulate, YoleckTypeHandler};
 use ezinput::prelude::{InputView, PressStateExt};
 use serde::{Deserialize, Serialize};
 
-use crate::global_types::{AppState, DownloadProgress, InputBinding, IsPlayer, WifiClient};
+use crate::global_types::{
+    AppState, DownloadProgress, GrabStatus, Grabbable, InputBinding, IsPlayer, WifiClient,
+};
 use crate::loading::GameAssets;
 use crate::movement_resolver::MoveController;
 use crate::player_control::PlayerControl;
@@ -83,17 +86,6 @@ fn edit(mut edit: YoleckEdit<Player>) {
     });
 }
 
-#[derive(Component)]
-enum GrabStatus {
-    NoGrab,
-    GrabFailed,
-    Reaching { hands_entity: Entity, how_long: f32 },
-    //Holding {
-    //hands_entity: Entity,
-    //other: Entity,
-    //},
-}
-
 fn control_grabbing_initiation(
     time: Res<Time>,
     input_views: Query<&InputView<InputBinding>>,
@@ -163,31 +155,65 @@ fn control_grabbing_initiation(
                     GrabStatus::NoGrab
                 }
             }
+            GrabStatus::Holding {
+                hands_entity,
+                other,
+            } => {
+                if should_grab {
+                    GrabStatus::Holding {
+                        hands_entity,
+                        other,
+                    }
+                } else {
+                    commands.entity(hands_entity).despawn_recursive();
+                    GrabStatus::NoGrab
+                }
+            }
         }
     }
 }
 
 fn handle_grabbing_taking_hold(
-    rapier_context: Res<RapierContext>,
-    mut grabbers_query: Query<(Entity, &mut GrabStatus)>,
+    mut grabbers_query: Query<(&GlobalTransform, &mut GrabStatus)>,
+    grabbable_query: Query<(Entity, &GlobalTransform), With<Grabbable>>,
+    mut commands: Commands,
 ) {
-    for (grabber_entity, grab_status) in grabbers_query.iter_mut() {
-        let hands_entity = if let GrabStatus::Reaching { hands_entity, .. } = *grab_status {
+    for (grabber_transform, mut grab_status) in grabbers_query.iter_mut() {
+        let hands_entity = if let GrabStatus::Reaching {
+            hands_entity,
+            how_long,
+        } = *grab_status
+        {
+            if how_long < 0.01 {
+                continue;
+            }
             hands_entity
         } else {
             continue;
         };
-        for (entity1, entity2, _) in rapier_context.intersections_with(hands_entity) {
-            let other = if entity1 == hands_entity {
-                entity2
-            } else {
-                assert!(entity2 == hands_entity);
-                entity1
+        if let Some((grabbable_entity, _)) = grabbable_query
+            .iter()
+            .filter_map(|(grabbable_entity, grabbable_transform)| {
+                let vec = (grabber_transform.rotation.inverse()
+                    * (grabbable_transform.translation - grabber_transform.translation))
+                    .truncate();
+                if vec.x.abs() <= 1.0 && 0.0 <= vec.y && vec.y <= 1.0 {
+                    Some((grabbable_entity, vec))
+                } else {
+                    None
+                }
+            })
+            .min_by_key(|(_, vec)| float_ord::FloatOrd(vec.x.abs() + vec.y * 5.0))
+        {
+            let mut joint = GenericJoint::new(JointAxesMask::all());
+            joint.set_local_anchor2(Vec2::new(0.0, 0.5));
+            commands
+                .entity(hands_entity)
+                .insert(ImpulseJoint::new(grabbable_entity, joint));
+            *grab_status = GrabStatus::Holding {
+                hands_entity,
+                other: grabbable_entity,
             };
-            if other == grabber_entity {
-                continue;
-            }
-            info!("{:?} {:?}", grabber_entity, other);
         }
     }
 }

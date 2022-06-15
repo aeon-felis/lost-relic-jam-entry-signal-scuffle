@@ -4,7 +4,7 @@ use bevy_yoleck::vpeol_2d::{yoleck_vpeol_position_edit_adapter, YoleckVpeolTrans
 use bevy_yoleck::{egui, YoleckEdit, YoleckExtForApp, YoleckPopulate, YoleckTypeHandler};
 use serde::{Deserialize, Serialize};
 
-use crate::global_types::{AppState, IsWifi, IsZombie, WifiClient};
+use crate::global_types::{AppState, Grabbable, IsWifi, IsZombie, WifiClient};
 use crate::loading::GameAssets;
 use crate::movement_resolver::MoveController;
 use crate::utils::some_or;
@@ -63,6 +63,7 @@ fn populate(mut populate: YoleckPopulate<Zombie>, game_assets: Res<GameAssets>) 
             ..Default::default()
         });
         cmd.insert(WifiClient::default());
+        cmd.insert(Grabbable);
         cmd.insert(ActiveEvents::COLLISION_EVENTS);
     });
 }
