@@ -1,5 +1,6 @@
 mod camera;
 mod door;
+mod floating_text;
 mod global_types;
 mod input;
 mod level_progress;
@@ -10,9 +11,10 @@ mod player;
 mod player_control;
 mod score;
 mod utils;
+mod wall;
 mod wifi;
 mod zombie;
-mod floating_text;
+mod playable_area;
 
 pub use crate::global_types::MenuActionForKbgp;
 use crate::loading::LoadingPlugin;
@@ -30,9 +32,11 @@ use self::input::GameInputPlugin;
 use self::level_progress::LevelProgressPlugin;
 use self::menu::MenuPlugin;
 use self::movement_resolver::MovementResolverPlugin;
+use self::playable_area::PlayableAreaPlugin;
 use self::player::PlayerPlugin;
 use self::player_control::PlayerControlPlugin;
 use self::score::ScorePlugin;
+use self::wall::WallPlugin;
 use self::wifi::WifiPlugin;
 use self::zombie::ZombiePlugin;
 
@@ -54,9 +58,11 @@ impl Plugin for GamePlugin {
         app.add_plugin(ScorePlugin);
 
         app.add_plugin(PlayerPlugin);
-        app.add_plugin(ZombiePlugin);
         app.add_plugin(WifiPlugin);
+        app.add_plugin(ZombiePlugin);
         app.add_plugin(DoorPlugin);
+        app.add_plugin(PlayableAreaPlugin);
+        app.add_plugin(WallPlugin);
         app.add_plugin(FloatingTextPlugin);
 
         app.add_plugin(LevelProgressPlugin);
