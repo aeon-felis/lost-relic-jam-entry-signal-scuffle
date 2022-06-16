@@ -7,6 +7,7 @@ mod level_progress;
 mod loading;
 mod menu;
 mod movement_resolver;
+mod playable_area;
 mod player;
 mod player_control;
 mod score;
@@ -14,7 +15,6 @@ mod utils;
 mod wall;
 mod wifi;
 mod zombie;
-mod playable_area;
 
 pub use crate::global_types::MenuActionForKbgp;
 use crate::loading::LoadingPlugin;

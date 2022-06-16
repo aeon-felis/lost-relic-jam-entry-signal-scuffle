@@ -12,11 +12,11 @@ impl Plugin for PlayableAreaPlugin {
         app.add_yoleck_handler({
             YoleckTypeHandler::<PlayableArea>::new("PlayableArea")
                 .populate_with(populate)
-                .with(yoleck_vpeol_position_edit_adapter(|playable_area: &mut PlayableArea| {
-                    YoleckVpeolTransform2dProjection {
+                .with(yoleck_vpeol_position_edit_adapter(
+                    |playable_area: &mut PlayableArea| YoleckVpeolTransform2dProjection {
                         translation: &mut playable_area.position,
-                    }
-                }))
+                    },
+                ))
                 .edit_with(edit)
         });
     }
@@ -37,10 +37,16 @@ fn default_size() -> Vec2 {
 fn populate(mut populate: YoleckPopulate<PlayableArea>) {
     populate.populate(|_ctx, data, mut cmd| {
         cmd.despawn_descendants();
-        cmd.insert_bundle(TransformBundle::from_transform(Transform::from_translation(data.position.extend(-0.1))));
+        cmd.insert_bundle(TransformBundle::from_transform(
+            Transform::from_translation(data.position.extend(-0.1)),
+        ));
+        cmd.insert(bevy_yoleck::vpeol::YoleckWillContainClickableChildren);
         cmd.with_children(|commands| {
             for (offset_direction, size) in [
-                (-Vec2::Y, Vec2::new(data.size.x, 0.0)),
+                (-Vec2::Y, Vec2::new(data.size.x + 0.5, 0.5)),
+                (Vec2::Y, Vec2::new(data.size.x + 0.5, 0.5)),
+                (-Vec2::X, Vec2::new(0.5, data.size.y + 0.5)),
+                (Vec2::X, Vec2::new(0.5, data.size.y + 0.5)),
             ] {
                 let mut cmd = commands.spawn();
                 cmd.insert_bundle(SpriteBundle {
@@ -49,7 +55,9 @@ fn populate(mut populate: YoleckPopulate<PlayableArea>) {
                         custom_size: Some(size),
                         ..Default::default()
                     },
-                    transform: Transform::from_translation((offset_direction * 0.5 * data.size).extend(0.0)),
+                    transform: Transform::from_translation(
+                        (offset_direction * 0.5 * data.size).extend(0.0),
+                    ),
                     ..Default::default()
                 });
                 cmd.insert(RigidBody::Fixed);
@@ -61,7 +69,6 @@ fn populate(mut populate: YoleckPopulate<PlayableArea>) {
 
 fn edit(mut edit: YoleckEdit<PlayableArea>) {
     edit.edit(|_ctx, data, ui| {
-        let orig_size = data.size;
         ui.horizontal(|ui| {
             ui.add(
                 egui::DragValue::new(&mut data.size.x)
@@ -74,9 +81,5 @@ fn edit(mut edit: YoleckEdit<PlayableArea>) {
                     .speed(0.05),
             );
         });
-        if orig_size != data.size {
-            let top_left = data.position - 0.5 * orig_size;
-            data.position = top_left + 0.5 * data.size;
-        }
     });
 }
