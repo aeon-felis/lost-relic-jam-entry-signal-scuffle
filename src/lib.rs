@@ -12,6 +12,7 @@ mod score;
 mod utils;
 mod wifi;
 mod zombie;
+mod floating_text;
 
 pub use crate::global_types::MenuActionForKbgp;
 use crate::loading::LoadingPlugin;
@@ -23,6 +24,7 @@ use bevy_yoleck::{YoleckLoadingCommand, YoleckManaged, YoleckSyncWithEditorState
 
 use self::camera::CameraPlugin;
 use self::door::DoorPlugin;
+use self::floating_text::FloatingTextPlugin;
 use self::global_types::{AppState, LevelProgress, MenuState};
 use self::input::GameInputPlugin;
 use self::level_progress::LevelProgressPlugin;
@@ -55,6 +57,8 @@ impl Plugin for GamePlugin {
         app.add_plugin(ZombiePlugin);
         app.add_plugin(WifiPlugin);
         app.add_plugin(DoorPlugin);
+        app.add_plugin(FloatingTextPlugin);
+
         app.add_plugin(LevelProgressPlugin);
         app.add_system(enable_disable_physics);
         if self.is_editor {
