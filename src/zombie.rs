@@ -4,7 +4,7 @@ use bevy_yoleck::vpeol_2d::{yoleck_vpeol_position_edit_adapter, YoleckVpeolTrans
 use bevy_yoleck::{egui, YoleckEdit, YoleckExtForApp, YoleckPopulate, YoleckTypeHandler};
 use serde::{Deserialize, Serialize};
 
-use crate::global_types::{AppState, Grabbable, IsWifi, IsZombie, WifiClient};
+use crate::global_types::{AppState, Grabbable, IsZombie, WifiClient, WifiRouter};
 use crate::loading::GameAssets;
 use crate::movement_resolver::MoveController;
 use crate::utils::some_or;
@@ -82,7 +82,7 @@ fn edit(mut edit: YoleckEdit<Zombie>) {
 
 fn follow_wifi_signal(
     mut zombies_query: Query<(&GlobalTransform, &WifiClient, &mut MoveController), With<IsZombie>>,
-    wifi_query: Query<&GlobalTransform, With<IsWifi>>,
+    wifi_query: Query<&GlobalTransform, With<WifiRouter>>,
 ) {
     for (zombie_transform, wifi_client, mut move_controller) in zombies_query.iter_mut() {
         let zombie_position = zombie_transform.translation.truncate();

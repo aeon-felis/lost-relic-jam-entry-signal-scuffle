@@ -1,9 +1,9 @@
 use bevy::prelude::*;
 use bevy_yoleck::vpeol_2d::{yoleck_vpeol_position_edit_adapter, YoleckVpeolTransform2dProjection};
-use bevy_yoleck::{YoleckExtForApp, YoleckPopulate, YoleckTypeHandler};
+use bevy_yoleck::{egui, YoleckEdit, YoleckExtForApp, YoleckPopulate, YoleckTypeHandler};
 use serde::{Deserialize, Serialize};
 
-use crate::global_types::{AppState, DownloadProgress, IsWifi, WifiClient};
+use crate::global_types::{AppState, DownloadProgress, WifiClient, WifiRouter};
 use crate::loading::GameAssets;
 
 pub struct WifiPlugin;
@@ -18,6 +18,7 @@ impl Plugin for WifiPlugin {
                         translation: &mut wifi.position,
                     }
                 }))
+                .edit_with(edit)
         });
         app.add_system_set({
             SystemSet::on_update(AppState::Game)
@@ -31,11 +32,15 @@ impl Plugin for WifiPlugin {
 pub struct Wifi {
     #[serde(default)]
     position: Vec2,
+    #[serde(default)]
+    full_strengh_radius: f32,
 }
 
 fn populate(mut populate: YoleckPopulate<Wifi>, game_assets: Res<GameAssets>) {
     populate.populate(|_ctx, data, mut cmd| {
-        cmd.insert(IsWifi);
+        cmd.insert(WifiRouter {
+            full_strengh_radius: data.full_strengh_radius,
+        });
         cmd.insert_bundle(SpriteBundle {
             sprite: Sprite {
                 custom_size: Some(Vec2::new(1.0, 1.0)),
@@ -51,17 +56,28 @@ fn populate(mut populate: YoleckPopulate<Wifi>, game_assets: Res<GameAssets>) {
     });
 }
 
+fn edit(mut edit: YoleckEdit<Wifi>) {
+    edit.edit(|_, data, ui| {
+        ui.add({
+            egui::Slider::new(&mut data.full_strengh_radius, 0.0..=4.0)
+                .prefix("Full Strength Radius: ")
+        });
+    });
+}
+
 fn update_access_points(
     mut clients_query: Query<(&GlobalTransform, &mut WifiClient)>,
-    wifis_query: Query<(Entity, &GlobalTransform), With<IsWifi>>,
+    wifis_query: Query<(Entity, &GlobalTransform, &WifiRouter)>,
 ) {
     for (client_transform, mut client) in clients_query.iter_mut() {
         if let Some((wifi_entity, signal_strength)) = wifis_query
             .iter()
-            .map(|(wifi_entity, wifi_transform)| {
+            .map(|(wifi_entity, wifi_transform, wifi_router)| {
                 let distance_sq = client_transform
                     .translation
                     .distance_squared(wifi_transform.translation);
+                let distance_sq = distance_sq - wifi_router.full_strengh_radius.powi(2);
+                let distance_sq = distance_sq.max(0.0);
                 let signal_strength = 1.0 / (1.0 + (0.2 * distance_sq).ln_1p());
                 (wifi_entity, signal_strength)
             })

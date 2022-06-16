@@ -60,7 +60,9 @@ pub enum GrabStatus {
 }
 
 #[derive(Component)]
-pub struct IsWifi;
+pub struct WifiRouter {
+    pub full_strengh_radius: f32,
+}
 
 #[derive(Component)]
 pub struct DoorStatus {
