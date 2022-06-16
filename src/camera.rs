@@ -55,10 +55,10 @@ fn update_camera_transform(
         let projection_width = projection.right - projection.left;
         let projection_height = projection.top - projection.bottom;
         let width_ratio = world_width / projection_width;
-        let height_ratio = world_height / projection_height;
+        let height_ratio = world_height / (projection_height - 50.0);
         let chosen_ratio = width_ratio.max(height_ratio) * 1.1;
         transform.scale = Vec3::new(chosen_ratio, chosen_ratio, 1.0);
         transform.translation.x = 0.5 * (minmax[0] + minmax[2]);
-        transform.translation.y = 0.5 * (minmax[1] + minmax[3]);
+        transform.translation.y = 0.5 * (minmax[1] + minmax[3]) + 50.0 * chosen_ratio;
     }
 }

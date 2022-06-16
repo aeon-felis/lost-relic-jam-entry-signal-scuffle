@@ -67,6 +67,7 @@ fn menu_layout(egui_context: &egui::Context, dlg: impl FnOnce(&mut egui::Ui)) {
         .show(egui_context, |ui| {
             let layout = egui::Layout::top_down(egui::Align::Center);
             ui.with_layout(layout, |ui| {
+                ui.add_space(50.0);
                 dlg(ui);
             });
         });
