@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::RigidBody;
-use bevy_yoleck::{YoleckEditorState, YoleckManaged};
+use bevy_yoleck::YoleckEditorState;
 
 use crate::utils::some_or;
 
@@ -11,12 +11,10 @@ pub struct CameraPlugin {
 impl Plugin for CameraPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(setup_camera);
-        if false {
-            app.add_system_set(
-                SystemSet::on_update(YoleckEditorState::GameActive)
-                    .with_system(update_camera_transform),
-            );
-        }
+        app.add_system_set(
+            SystemSet::on_update(YoleckEditorState::GameActive)
+                .with_system(update_camera_transform),
+        );
     }
 }
 
@@ -29,7 +27,7 @@ fn setup_camera(mut commands: Commands) {
 
 fn update_camera_transform(
     mut cameras_query: Query<(&Camera, &mut Transform, &OrthographicProjection)>,
-    non_dynamic_objects_query: Query<(&GlobalTransform, &Sprite, &RigidBody), With<YoleckManaged>>,
+    non_dynamic_objects_query: Query<(&GlobalTransform, &Sprite, &RigidBody)>,
 ) {
     let mut minmax: Option<[f32; 4]> = None;
     for (global_transform, sprite, rigid_body) in non_dynamic_objects_query.iter() {
