@@ -6,7 +6,7 @@ use bevy_yoleck::vpeol_2d::{yoleck_vpeol_position_edit_adapter, YoleckVpeolTrans
 use bevy_yoleck::{YoleckExtForApp, YoleckPopulate, YoleckTypeHandler};
 use serde::{Deserialize, Serialize};
 
-use crate::global_types::{AppState, DoorStatus, DownloadProgress, IsPlayer, CameraInclude};
+use crate::global_types::{AppState, CameraInclude, DoorStatus, DownloadProgress, IsPlayer};
 use crate::loading::GameAssets;
 use crate::utils::entities_ordered_by_type;
 

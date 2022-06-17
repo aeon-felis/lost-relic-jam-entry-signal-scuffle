@@ -34,9 +34,13 @@ fn setup_camera(mut commands: Commands) {
     commands.spawn_bundle(camera);
 }
 
+#[allow(clippy::type_complexity)]
 fn update_camera_transform(
     mut cameras_query: Query<(&mut Transform, &OrthographicProjection), With<Camera>>,
-    camera_included_objects_query: Query<(&GlobalTransform, AnyOf<(&Sprite, &Text2dSize)>), With<CameraInclude>>,
+    camera_included_objects_query: Query<
+        (&GlobalTransform, AnyOf<(&Sprite, &Text2dSize)>),
+        With<CameraInclude>,
+    >,
     mut egui_settings: ResMut<EguiSettings>,
 ) {
     let mut minmax: Option<[f32; 4]> = None;
@@ -45,7 +49,10 @@ fn update_camera_transform(
             let vec = 0.5 * sprite.custom_size.unwrap().extend(0.0);
             (-vec, vec)
         } else if let Some(text_2d_size) = text_2d_size {
-            (Vec3::ZERO, Vec3::new(text_2d_size.size.width, text_2d_size.size.height, 0.0))
+            (
+                Vec3::ZERO,
+                Vec3::new(text_2d_size.size.width, text_2d_size.size.height, 0.0),
+            )
         } else {
             panic!("No option for calculating the size");
         };

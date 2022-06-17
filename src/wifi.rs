@@ -3,7 +3,7 @@ use bevy_yoleck::vpeol_2d::{yoleck_vpeol_position_edit_adapter, YoleckVpeolTrans
 use bevy_yoleck::{egui, YoleckEdit, YoleckExtForApp, YoleckPopulate, YoleckTypeHandler};
 use serde::{Deserialize, Serialize};
 
-use crate::global_types::{AppState, DownloadProgress, WifiClient, WifiRouter, CameraInclude};
+use crate::global_types::{AppState, CameraInclude, DownloadProgress, WifiClient, WifiRouter};
 use crate::loading::GameAssets;
 
 pub struct WifiPlugin;
