@@ -26,7 +26,7 @@ def run(ctx):
     ) & TERMINAL_PANEL.size(20)
 
 
-@task.options
+@task.options(alias=':1')
 def level(ctx):
     ctx.key(lambda level: level['filename'].removesuffix('.yol').replace('_', ' '))
     ctx.value(lambda level: level['filename'].removesuffix('.yol'))
