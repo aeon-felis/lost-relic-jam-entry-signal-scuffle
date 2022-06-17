@@ -22,12 +22,13 @@ fn show_score(
         ui.set_max_width(200.0);
         ui.scope(|ui| {
             ui.style_mut().visuals.selection.bg_fill = egui::Color32::YELLOW;
-            ui.add(
-                egui::ProgressBar::new(wifi_client.signal_strength).text(format!(
+            ui.add(egui::ProgressBar::new(wifi_client.signal_strength).text({
+                egui::RichText::new(format!(
                     "Signal Strength {:.2}",
-                    wifi_client.signal_strength
-                )),
-            );
+                    wifi_client.signal_strength,
+                ))
+                .weak()
+            }));
         });
         ui.scope(|ui| match download_progress {
             DownloadProgress::Disconnected => {}
@@ -36,21 +37,27 @@ fn show_score(
                 progress,
             } => {
                 ui.style_mut().visuals.selection.bg_fill = egui::Color32::RED;
-                ui.add(egui::ProgressBar::new(*progress).text(format!(
-                    "Losing Progress In {:.0}",
-                    time_before_disconnection
-                )));
+                ui.add(egui::ProgressBar::new(*progress).text({
+                    egui::RichText::new(format!(
+                        "Losing Progress In {:.0}",
+                        time_before_disconnection,
+                    ))
+                    .strong()
+                }));
             }
             DownloadProgress::Downloading { progress } => {
                 ui.style_mut().visuals.selection.bg_fill = egui::Color32::BLUE;
-                ui.add(
-                    egui::ProgressBar::new(*progress)
-                        .text(format!("Downloading: {:.0}%", 100.0 * progress)),
-                );
+                ui.style_mut().visuals.override_text_color = Some(egui::Color32::WHITE);
+                ui.add(egui::ProgressBar::new(*progress).text({
+                    egui::RichText::new(format!("Downloading {:.0}%", 100.0 * progress)).strong()
+                }));
             }
             DownloadProgress::Completed => {
                 ui.style_mut().visuals.selection.bg_fill = egui::Color32::GREEN;
-                ui.add(egui::ProgressBar::new(1.0).text("Download Complete"));
+                ui.add(
+                    egui::ProgressBar::new(1.0)
+                        .text(egui::RichText::new("Download Complete").strong()),
+                );
             }
         });
     });
