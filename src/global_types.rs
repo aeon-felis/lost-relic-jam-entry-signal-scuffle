@@ -43,6 +43,9 @@ pub enum InputBinding {
 }
 
 #[derive(Component)]
+pub struct CameraInclude;
+
+#[derive(Component)]
 pub struct IsPlayer;
 
 #[derive(Component)]

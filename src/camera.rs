@@ -3,6 +3,7 @@ use bevy::text::Text2dSize;
 use bevy_egui::EguiSettings;
 use bevy_yoleck::YoleckEditorState;
 
+use crate::global_types::CameraInclude;
 use crate::utils::some_or;
 
 pub struct CameraPlugin {
@@ -35,22 +36,21 @@ fn setup_camera(mut commands: Commands) {
 
 fn update_camera_transform(
     mut cameras_query: Query<(&mut Transform, &OrthographicProjection), With<Camera>>,
-    non_dynamic_objects_query: Query<(&GlobalTransform, AnyOf<(&Sprite, &Text2dSize)>)>,
+    camera_included_objects_query: Query<(&GlobalTransform, AnyOf<(&Sprite, &Text2dSize)>), With<CameraInclude>>,
     mut egui_settings: ResMut<EguiSettings>,
 ) {
     let mut minmax: Option<[f32; 4]> = None;
-    for (global_transform, (sprite, text_2d_size)) in non_dynamic_objects_query.iter() {
-        let half_size = 0.5 * {
-            if let Some(sprite) = sprite {
-                sprite.custom_size.unwrap().extend(0.0)
-            } else if let Some(text_2d_size) = text_2d_size {
-                Vec3::new(text_2d_size.size.width, text_2d_size.size.height, 0.0)
-            } else {
-                panic!("No option for calculating the size");
-            }
+    for (global_transform, (sprite, text_2d_size)) in camera_included_objects_query.iter() {
+        let (vec_to_min, vec_to_max) = if let Some(sprite) = sprite {
+            let vec = 0.5 * sprite.custom_size.unwrap().extend(0.0);
+            (-vec, vec)
+        } else if let Some(text_2d_size) = text_2d_size {
+            (Vec3::ZERO, Vec3::new(text_2d_size.size.width, text_2d_size.size.height, 0.0))
+        } else {
+            panic!("No option for calculating the size");
         };
-        let min_corner = global_transform.mul_vec3(-half_size);
-        let max_corner = global_transform.mul_vec3(half_size);
+        let min_corner = global_transform.mul_vec3(vec_to_min);
+        let max_corner = global_transform.mul_vec3(vec_to_max);
         minmax = if let Some([l, b, r, t]) = minmax {
             Some([
                 l.min(min_corner.x),

@@ -6,7 +6,7 @@ use bevy_yoleck::vpeol_2d::{yoleck_vpeol_position_edit_adapter, YoleckVpeolTrans
 use bevy_yoleck::{YoleckExtForApp, YoleckPopulate, YoleckTypeHandler};
 use serde::{Deserialize, Serialize};
 
-use crate::global_types::{AppState, DoorStatus, DownloadProgress, IsPlayer};
+use crate::global_types::{AppState, DoorStatus, DownloadProgress, IsPlayer, CameraInclude};
 use crate::loading::GameAssets;
 use crate::utils::entities_ordered_by_type;
 
@@ -49,6 +49,7 @@ fn populate(mut populate: YoleckPopulate<Door>, game_assets: Res<GameAssets>) {
         cmd.insert_bundle(TransformBundle::from_transform(
             Transform::from_translation(data.position.extend(-0.1)),
         ));
+        cmd.insert(CameraInclude);
         cmd.insert(Collider::cuboid(0.5, 0.5));
         cmd.insert(Sensor(true));
         cmd.insert(ActiveEvents::COLLISION_EVENTS);

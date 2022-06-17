@@ -3,7 +3,7 @@ use bevy_yoleck::vpeol_2d::{yoleck_vpeol_position_edit_adapter, YoleckVpeolTrans
 use bevy_yoleck::{egui, YoleckEdit, YoleckExtForApp, YoleckPopulate, YoleckTypeHandler};
 use serde::{Deserialize, Serialize};
 
-use crate::global_types::{AppState, DownloadProgress, WifiClient, WifiRouter};
+use crate::global_types::{AppState, DownloadProgress, WifiClient, WifiRouter, CameraInclude};
 use crate::loading::GameAssets;
 
 pub struct WifiPlugin;
@@ -53,6 +53,7 @@ fn populate(mut populate: YoleckPopulate<Wifi>, game_assets: Res<GameAssets>) {
         cmd.insert_bundle(TransformBundle::from_transform(
             Transform::from_translation(data.position.extend(1.0)),
         ));
+        cmd.insert(CameraInclude);
     });
 }
 

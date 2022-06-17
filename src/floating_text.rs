@@ -3,6 +3,7 @@ use bevy_yoleck::vpeol_2d::yoleck_vpeol_position_edit_adapter;
 use bevy_yoleck::{egui, YoleckEdit, YoleckExtForApp, YoleckPopulate, YoleckTypeHandler};
 use serde::{Deserialize, Serialize};
 
+use crate::global_types::CameraInclude;
 use crate::loading::GameAssets;
 
 pub struct FloatingTextPlugin;
@@ -66,6 +67,7 @@ fn populate(mut populate: YoleckPopulate<FloatingText>, game_assets: Res<GameAss
             },
             ..Default::default()
         });
+        cmd.insert(CameraInclude);
     });
 }
 

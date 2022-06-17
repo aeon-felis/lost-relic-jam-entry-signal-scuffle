@@ -5,6 +5,8 @@ use bevy_yoleck::vpeol_2d::{yoleck_vpeol_position_edit_adapter, YoleckVpeolTrans
 use bevy_yoleck::{YoleckEdit, YoleckExtForApp, YoleckPopulate, YoleckTypeHandler};
 use serde::{Deserialize, Serialize};
 
+use crate::global_types::CameraInclude;
+
 pub struct PlayableAreaPlugin;
 
 impl Plugin for PlayableAreaPlugin {
@@ -60,6 +62,7 @@ fn populate(mut populate: YoleckPopulate<PlayableArea>) {
                     ),
                     ..Default::default()
                 });
+                cmd.insert(CameraInclude);
                 cmd.insert(RigidBody::Fixed);
                 cmd.insert(Collider::cuboid(0.5 * size.x, 0.5 * size.y));
             }

@@ -6,6 +6,8 @@ use bevy_yoleck::vpeol_2d::{yoleck_vpeol_position_edit_adapter, YoleckVpeolTrans
 use bevy_yoleck::{YoleckEdit, YoleckExtForApp, YoleckPopulate, YoleckTypeHandler};
 use serde::{Deserialize, Serialize};
 
+use crate::global_types::CameraInclude;
+
 pub struct WallPlugin;
 
 impl Plugin for WallPlugin {
@@ -49,6 +51,7 @@ fn populate(mut populate: YoleckPopulate<Wall>) {
                 .with_rotation(Quat::from_rotation_z(data.rotation)),
             ..Default::default()
         });
+        cmd.insert(CameraInclude);
         cmd.insert(RigidBody::Fixed);
         cmd.insert(Collider::cuboid(0.5 * data.size.x, 0.5 * data.size.y));
     });
