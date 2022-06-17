@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
-use bevy_rapier2d::rapier::prelude::JointAxesMask;
+use bevy_rapier2d::rapier::prelude::{JointAxesMask, JointAxis};
 use bevy_yoleck::vpeol_2d::{yoleck_vpeol_position_edit_adapter, YoleckVpeolTransform2dProjection};
 use bevy_yoleck::{egui, YoleckEdit, YoleckExtForApp, YoleckPopulate, YoleckTypeHandler};
 use ezinput::prelude::{InputView, PressStateExt};
@@ -205,8 +205,11 @@ fn handle_grabbing_taking_hold(
             })
             .min_by_key(|(_, vec)| float_ord::FloatOrd(vec.x.abs() + vec.y * 5.0))
         {
-            let mut joint = GenericJoint::new(JointAxesMask::all());
+            let mut joint = GenericJoint::new(JointAxesMask::empty());
             joint.set_local_anchor2(Vec2::new(0.0, 0.5));
+            joint.set_motor(JointAxis::X, 0.0, 0.0, 1000.0, 0.0);
+            joint.set_motor(JointAxis::Y, 0.0, 0.0, 1000.0, 0.0);
+            joint.set_motor(JointAxis::AngX, 0.0, 0.0, 1000.0, 0.0);
             commands
                 .entity(hands_entity)
                 .insert(ImpulseJoint::new(grabbable_entity, joint));
