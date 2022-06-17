@@ -97,7 +97,7 @@ fn update_download_progress(
     mut query: Query<(&WifiClient, &mut DownloadProgress)>,
 ) {
     for (wifi_client, mut download_progress) in query.iter_mut() {
-        let connected = 0.7 <= wifi_client.signal_strength;
+        let connected = 0.8 <= wifi_client.signal_strength;
         *download_progress = match *download_progress {
             DownloadProgress::Disconnected => {
                 if connected {
@@ -127,7 +127,7 @@ fn update_download_progress(
             }
             DownloadProgress::Downloading { progress } => {
                 if connected {
-                    let progress = progress + time.delta_seconds() / 2.0;
+                    let progress = progress + time.delta_seconds() / 10.0;
                     if 1.0 <= progress {
                         DownloadProgress::Completed
                     } else {
