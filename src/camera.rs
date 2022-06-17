@@ -16,6 +16,13 @@ impl Plugin for CameraPlugin {
             SystemSet::on_update(YoleckEditorState::GameActive)
                 .with_system(update_camera_transform),
         );
+        app.add_system_set(
+            SystemSet::on_enter(YoleckEditorState::EditorActive).with_system(
+                |mut egui_settings: ResMut<EguiSettings>| {
+                    egui_settings.scale_factor = 1.0;
+                },
+            ),
+        );
     }
 }
 
@@ -37,11 +44,7 @@ fn update_camera_transform(
             if let Some(sprite) = sprite {
                 sprite.custom_size.unwrap().extend(0.0)
             } else if let Some(text_2d_size) = text_2d_size {
-                Vec3::new(
-                    text_2d_size.size.width,
-                    text_2d_size.size.height,
-                    0.0,
-                )
+                Vec3::new(text_2d_size.size.width, text_2d_size.size.height, 0.0)
             } else {
                 panic!("No option for calculating the size");
             }
