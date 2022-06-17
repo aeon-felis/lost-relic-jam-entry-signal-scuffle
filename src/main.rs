@@ -31,7 +31,6 @@ fn main() {
         width: 800.,
         height: 600.,
         title: "Signal Scuffle".to_string(),
-        resizable: false,
         ..Default::default()
     });
     app.add_plugins(DefaultPlugins);

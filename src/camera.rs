@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_egui::EguiSettings;
 use bevy_rapier2d::prelude::RigidBody;
 use bevy_yoleck::YoleckEditorState;
 
@@ -26,8 +27,9 @@ fn setup_camera(mut commands: Commands) {
 }
 
 fn update_camera_transform(
-    mut cameras_query: Query<(&Camera, &mut Transform, &OrthographicProjection)>,
+    mut cameras_query: Query<(&mut Transform, &OrthographicProjection), With<Camera>>,
     non_dynamic_objects_query: Query<(&GlobalTransform, &Sprite, &RigidBody)>,
+    mut egui_settings: ResMut<EguiSettings>,
 ) {
     let mut minmax: Option<[f32; 4]> = None;
     for (global_transform, sprite, rigid_body) in non_dynamic_objects_query.iter() {
@@ -51,12 +53,13 @@ fn update_camera_transform(
     let minmax = some_or!(minmax; return);
     let world_width = minmax[2] - minmax[0];
     let world_height = minmax[3] - minmax[1];
-    for (_camera, mut transform, projection) in cameras_query.iter_mut() {
+    for (mut transform, projection) in cameras_query.iter_mut() {
         let projection_width = projection.right - projection.left;
         let projection_height = projection.top - projection.bottom;
         let width_ratio = world_width / projection_width;
         let height_ratio = world_height / (projection_height - 50.0);
         let chosen_ratio = width_ratio.max(height_ratio) * 1.1;
+        egui_settings.scale_factor = 0.033 / chosen_ratio as f64;
         transform.scale = Vec3::new(chosen_ratio, chosen_ratio, 1.0);
         transform.translation.x = 0.5 * (minmax[0] + minmax[2]);
         transform.translation.y = 0.5 * (minmax[1] + minmax[3]) + 50.0 * chosen_ratio;
